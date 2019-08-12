@@ -200,11 +200,11 @@ func evaluate(filename string) map[string][]string {
 				var key, value, distVal string
 				for c, cell := range row.Cells {
 					if c == 0 {
-						distVal = cell.String()
+						distVal = strings.TrimSpace(cell.String())
 					} else if c == 1 {
-						key = cell.String()
+						key = strings.TrimSpace(cell.String())
 					} else if c == 2 {
-						value = cell.String()
+						value = strings.TrimSpace(cell.String())
 					}
 				}
 
