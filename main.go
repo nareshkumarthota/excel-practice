@@ -10,13 +10,29 @@ import (
 var totalBenValues map[string][]string
 var totalValueSet map[string]string
 var mtx sync.Mutex
+var mdk []string
+var sgd []string
+
+type data struct {
+	mandal     string
+	totalHabs  int
+	gpCount    int
+	benCount   int
+	tallyCount int
+	diff       int
+}
 
 func main() {
+
+	mdk = []string{"Shankarampet(A)", "HAVELI GHANPUR", "TEKMAL", "Medak", "Papannapet"}
+
 	// excelFileName := "/home/naresh/Desktop/Docs/MissionBhagiratha_GP_Resolution_Report.xlsx"
 	excelFileName := "./MB_Hab_Wise_Benficiaries_Report.xlsx"
 	tempBenf := evaluate(excelFileName)
 	excelFileName = "./MissionBhagiratha_GP_Resolution_Report.xlsx"
 	tempGP := evaluate(excelFileName)
+
+	totalArry := make([]data, 0)
 
 	totalValueSet = make(map[string]string)
 	for k, v := range tempGP {
@@ -34,15 +50,29 @@ func main() {
 				}
 			}
 		}
+		dataVal := data{}
 
-		fmt.Printf("%20v", k)
-		tgp := fmt.Sprintf("TOTAL-GP: %v", len(v))
-		fmt.Printf("%20v", tgp)
-		tbn := fmt.Sprintf("TOTAL-BN: %v", len(tempBenf[k]))
-		fmt.Printf("%20v", tbn)
-		tlc := fmt.Sprintf("TallyCount: %v", talliedCount)
-		fmt.Printf("%20v", tlc)
-		fmt.Printf("\n")
+		dataVal.mandal = k
+		dataVal.gpCount = len(v)
+		dataVal.benCount = len(tempBenf[k])
+		dataVal.tallyCount = talliedCount
+		dataVal.diff = dataVal.totalHabs - dataVal.tallyCount
+
+		totalArry = append(totalArry, dataVal)
+
+		for _, val := range mdk {
+			if val == k {
+				fmt.Printf("%20v", k)
+				tgp := fmt.Sprintf("TOTAL-GP: %v", len(v))
+				fmt.Printf("%20v", tgp)
+				tbn := fmt.Sprintf("TOTAL-BN: %v", len(tempBenf[k]))
+				fmt.Printf("%20v", tbn)
+				tlc := fmt.Sprintf("TallyCount: %v", talliedCount)
+				fmt.Printf("%20v", tlc)
+				fmt.Printf("\n")
+			}
+		}
+
 	}
 }
 
