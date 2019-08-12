@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/tealeg/xlsx"
 )
@@ -30,6 +32,8 @@ type mandlCount struct {
 }
 
 func main() {
+
+	sheetData := make([]mandlCount, 0)
 
 	sangareddyDist = make(map[string][]mndlHabs)
 	sangareddyDist["Andole SD"] = []mndlHabs{mndlHabs{mandalName: "Andole", totalHabs: 30}, mndlHabs{mandalName: "Pulkal", totalHabs: 45}, mndlHabs{mandalName: "Wattpally", totalHabs: 28}}
@@ -116,10 +120,20 @@ func main() {
 						fmt.Printf("%5v", vv1.tallycount)
 						fmt.Printf("%5v", vv1.diff)
 						fmt.Println()
+
+						sheetData = append(sheetData, vv1)
 					}
 				}
 
 			}
+			temp := mandlCount{}
+			temp.name = k
+			temp.totalhbs = totalhbs
+			temp.totalgp = totalgps
+			temp.totalbn = totalbns
+			temp.tallycount = totaltally
+			temp.diff = totaldiff
+
 			fmt.Printf("%20v", k)
 			fmt.Printf("%5v", totalhbs)
 			fmt.Printf("%5v", totalgps)
@@ -128,6 +142,8 @@ func main() {
 			fmt.Printf("%5v", totaldiff)
 			fmt.Println()
 			fmt.Println()
+
+			sheetData = append(sheetData, temp)
 
 			hbs = totalhbs + hbs
 			gps = totalgps + gps
@@ -150,8 +166,19 @@ func main() {
 		fmt.Println()
 		fmt.Println()
 		fmt.Println()
-	}
 
+		temp := mandlCount{}
+		temp.name = dist
+		temp.totalhbs = hbs
+		temp.totalgp = gps
+		temp.totalbn = bns
+		temp.tallycount = tallys
+		temp.diff = diffs
+
+		sheetData = append(sheetData, temp)
+
+	}
+	createSheet(sheetData)
 }
 
 func evaluate(filename string) map[string][]string {
@@ -219,4 +246,40 @@ func unique(intSlice []string) []string {
 		}
 	}
 	return list
+}
+
+func createSheet(data []mandlCount) {
+	var file *xlsx.File
+	var sheet *xlsx.Sheet
+	var row *xlsx.Row
+	var cell *xlsx.Cell
+	var err error
+
+	file = xlsx.NewFile()
+	sheet, err = file.AddSheet("Sheet1")
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+
+	for _, val := range data {
+		row = sheet.AddRow()
+		cell = row.AddCell()
+		cell.Value = val.name
+		cell = row.AddCell()
+		cell.SetInt(val.totalhbs)
+		cell = row.AddCell()
+		cell.SetInt(val.totalgp)
+		cell = row.AddCell()
+		cell.SetInt(val.totalbn)
+		cell = row.AddCell()
+		cell.SetInt(val.tallycount)
+		cell = row.AddCell()
+		cell.SetInt(val.diff)
+	}
+
+	dt := time.Now()
+	err = file.Save("Report-" + strings.ReplaceAll((strings.Split(dt.String(), ":")[0]), " ", "") + ".xlsx")
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
 }
